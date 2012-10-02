@@ -10,7 +10,7 @@ from app import App
 
 
 @task
-def add_app(appname, domain=False, url_path='/api/proc_tasks'):
+def add_app(appname, domain=False, url_path='/api/proc_tasks', user=False, password=False):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)

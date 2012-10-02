@@ -20,6 +20,9 @@ Configuration options
 ---------------------
 
 The following Environment Variables can be configured to tweak the behaviour of the worker process
+configure this by setting your local envinronment variable, or on heroku using
+    heroku config:set SLEEP_PERIOD=10 [--app <herokscalarapp>]
+    heroku config:set COUNT_BOUNDARY=10 [--app <herokscalarapp>]
 
 SLEEP_PERIOD  = 10 (positive integer)
 -------------------------------------
@@ -36,4 +39,51 @@ e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we wou
     'celeryd' to 1 worker
     'celerybd' to 10 workers
     'someotherproc' to 0 workers
+
+
+Adding an app to be scaled
+===========================
+
+The supplied fabric.py file contains the following functions
+
+all functions can be called using heroku's run command
+e.g. 
+    heroku run <function>[:params] [--app <herokscalarapp>]
+
+herokscalarapp is the name of the heroku app where you are deploying the scalar to run. You will only have to specify this is you have more than one configured in your .git/config
+
+initialise_project
+------------------
+
+Call this to create the projects database table
+
+
+e.g. heroku run fab initialise_project [--app herokscalarapp]
+
+
+add_app
+-------
+takes the following params
+appname = name of the app you want to monitor and scale
+app_api_url = optional url for specifying what url the scalar will query for its process information
+    default = http://<appname>.herokuapp.com/api/scalar_tasks/
+
+e.g  
+    heroku run add_app:myherokuapp  [--app herokscalarapp]
+    or
+    heroku run add_app:myherokuapp,http://my.domain.com/api/path/to  [--app herokscalarapp]
+    or
+    heroku run add_app:myherokuapp,http://user:pass@my.domain.com/api/path/to  [--app herokscalarapp]
+
+N.B. If you wish to specify a username and a password for accessing your app's api then you should specify it like
+
+    heroku run add_app:myherokuapp,http://user:pass@<appname>.herokuapp.com/api/path/to  [--app herokscalarapp]
+    
+
+del_app
+-------
+Removes an app from being scaled and monitored
+
+e.g. 
+    heroku run del_app:<appname> [--app herokscalarapp]
 
