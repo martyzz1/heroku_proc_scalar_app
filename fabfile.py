@@ -1,16 +1,13 @@
 import os
-import sys
-#import urllib2
-from fabric.api import task, local, env, require, settings, hide
-from fabric.utils import abort
-#from unidecode import unidecode
+from urlparse import urlparse
+from fabric.api import task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app import App
 
 
 @task
-def add_app(appname, domain=False, url_path='/api/proc_tasks', user=False, password=False):
+def add_app(appname, app_api_url=False):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)
@@ -18,17 +15,37 @@ def add_app(appname, domain=False, url_path='/api/proc_tasks', user=False, passw
 
     app = session.query(App).filter_by(appname=appname).first()
 
-    if domain is False:
-        domain = "%s.herokuapp.com" % appname
-
     if app is not None:
-        print "App '%s' already exists, updating it with domain = %s and url_path = %s" % (appname, domain, url_path)
-        app.domain = domain
-        app.url_path = url_path
+        print "App '%s' already exists, updating it" % appname
     else:
-        print "Configuring new app '%s' with domain = %s and url_path = %s" % (appname, domain, url_path)
-        app = App(appname=appname, domain=domain, url_path=url_path)
+        print "Configuring new app for '%s'" % (appname)
+        app = App(appname=appname)
         session.add(app)
+
+    full_url = "http://%s.herokuapp.com/api/proc_count" % appname
+
+    if app_api_url is not None:
+        url = urlparse(app_api_url)
+        hostname = url.hostname
+        scheme = url.scheme
+        if scheme is None:
+            scheme = 'http'
+        port = url.port
+        if port is not None:
+            port = ":%s" % port
+        else:
+            port = ''
+        path = url.path
+        username = url.username
+        password = url.password
+        if password:
+            app.password = password
+        if username:
+            app.username = username
+
+        full_url = "%s://%s%s%s" % (scheme, hostname, port, path)
+
+    app.app_api_url = full_url
 
     session.commit()
 
