@@ -28,15 +28,22 @@ configure this by setting your local envinronment variable, or on heroku using
 
 SLEEP_PERIOD  = 10 (positive integer)
 -------------------------------------
-The number of seconds the scalar will sleep before commencing its polling of ALL configured apps
+The number of seconds the scalar will sleep before recommencing its polling of ALL configured apps
 
 
 COUNT_BOUNDARY = 0  (any positive integers)
 -------------------------------------------
 The number of counts per Scaled process..
-The default mode '0' simply says if count > 0 scale the proc to 1. if count is 0, scale the proc to 0
+The default mode '0' simply says if count > 0 scale the proc to 1. if count is 0, scale the proc to 0.
+
+e.g.  if the COUNT_BOUNDARY = 0(default)  and the returned json is as above, then we would scale as follows:-
+
+    'celeryd' to 1 worker
+    'celerybd' to 1 workers
+    'someotherproc' to 0 workers
+
 However if the COUNT_BOUNDARY is a positive integer, we use this to determine how many processes to scale to
-e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we would scale ias follows:-
+e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we would scale as follows:-
 
     'celeryd' to 1 worker
     'celerybd' to 10 workers
