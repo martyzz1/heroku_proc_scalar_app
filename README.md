@@ -26,6 +26,23 @@ configure this by setting your local envinronment variable, or on heroku using
     heroku config:set SLEEP_PERIOD=10 [--app <herokscalarapp>]
     heroku config:set COUNT_BOUNDARY=10 [--app <herokscalarapp>]
 
+DATABASE_URL
+------------
+
+This Specifies your postgres database url. You can get one by adding any of the postgres addons in heroku, then query your heroku config and copy the default configured URL to this variable e.g.
+
+    1. heroku addons:add heroku-postgresql:dev
+    2. heroku config [--app <herokuscalarapp>]
+    == heroku-proc-scalar Config Vars
+    HEROKU_POSTGRESQL_BLACK_URL: postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
+    3. heroku config:set DATABASE_URL=postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
+    
+    resulting in:-
+    4. heroku config [--app <herokuscalarapp>]
+    = heroku-proc-scalar Config Vars
+    DATABASE_URL:                postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
+    HEROKU_POSTGRESQL_BLACK_URL: postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
+
 SLEEP_PERIOD  = 10 (positive integer)
 -------------------------------------
 The number of seconds the scalar will sleep before recommencing its polling of ALL configured apps
@@ -42,7 +59,7 @@ e.g.  if the COUNT_BOUNDARY = 0(default)  and the returned json is as above, the
     'celerybd' to 1 workers
     'someotherproc' to 0 workers
 
-However if the COUNT_BOUNDARY is a positive integer, we use this to determine how many processes to scale to
+However if the COUNT_BOUNDARY is a positive integer, we use this to determine how many processes to scale to - loosly- using ROUND(INT(count/COUNT_BOUNDARY))
 e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we would scale as follows:-
 
     'celeryd' to 1 worker
