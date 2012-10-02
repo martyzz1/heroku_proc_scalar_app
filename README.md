@@ -1,8 +1,9 @@
 heroku-proc-scalar
 ====================
 
-Scale heroku processes for multiple heroku apps based on api call to each app
-A sample api python view can be found in the examples directory
+Scale heroku processes for multiple heroku apps based on api call to each app.
+
+A sample api python view can be found in the examples directory.
 
 In essence it expects a json response which contains a simple result list of "procname" to "count" like this:-
 
@@ -12,7 +13,7 @@ In essence it expects a json response which contains a simple result list of "pr
     'someotherproc':0
 }
 
-The procname is the name of the process configured in your app's Procfile
+The procname is the name of the process configured in your app's Procfile.
 The count can be representative of anything you want. For me, I use this as a counter of the number of tasks in a Celery Queue. The idea being that 
 when the count is 0 I scale the process to 0 to save me some money. 
 
