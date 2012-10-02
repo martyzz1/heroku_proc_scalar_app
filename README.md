@@ -7,11 +7,11 @@ A sample api python view can be found in the examples directory.
 
 In essence it expects a json response which contains a simple result list of "procname" to "count" like this:-
 
-{
-    'celeryd':2,
-    'celerybd':99,
-    'someotherproc':0
-}
+    {
+        'celeryd':2,
+        'celerybd':99,
+        'someotherproc':0
+    }
 
 The procname is the name of the process configured in your app's Procfile.
 The count can be representative of anything you want. For me, I use this as a counter of the number of tasks in a Celery Queue. The idea being that 
@@ -22,6 +22,7 @@ Configuration options
 
 The following Environment Variables can be configured to tweak the behaviour of the worker process
 configure this by setting your local envinronment variable, or on heroku using
+
     heroku config:set SLEEP_PERIOD=10 [--app <herokscalarapp>]
     heroku config:set COUNT_BOUNDARY=10 [--app <herokscalarapp>]
 
@@ -49,6 +50,7 @@ The supplied fabric.py file contains the following functions
 
 all functions can be called using heroku's run command
 e.g. 
+
     heroku run <function>[:params] [--app <herokscalarapp>]
 
 herokscalarapp is the name of the heroku app where you are deploying the scalar to run. You will only have to specify this is you have more than one configured in your .git/config
@@ -59,7 +61,9 @@ initialise_project
 Call this to create the projects database table
 
 
-e.g. heroku run fab initialise_project [--app herokscalarapp]
+e.g. 
+    
+    heroku run fab initialise_project [--app herokscalarapp]
 
 
 add_app
@@ -70,6 +74,7 @@ app_api_url = optional url for specifying what url the scalar will query for its
     default = http://<appname>.herokuapp.com/api/scalar_tasks/
 
 e.g  
+
     heroku run add_app:myherokuapp  [--app herokscalarapp]
     or
     heroku run add_app:myherokuapp,http://my.domain.com/api/path/to  [--app herokscalarapp]
@@ -84,6 +89,7 @@ N.B. If you wish to specify a username and a password for accessing your app's a
 del_app
 -------
 Removes an app from being scaled and monitored
+
 
 e.g. 
     heroku run del_app:<appname> [--app herokscalarapp]
