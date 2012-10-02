@@ -19,13 +19,13 @@ when the count is 0 I scale the process to 0 to save me some money.
 Configuration options
 ====================
 
-The following Environment Variables can be configured to tweak the beahviour of the worker process
+The following Environment Variables can be configured to tweak the behaviour of the worker process
 
-SLEEP_PERIOD  = 10
+SLEEP_PERIOD  = 10 (positive integer)
 The number of seconds the scalar will sleep before commencing its polling of ALL configured apps
 
 
-COUNT_BOUNDARY=0
+COUNT_BOUNDARY = 0  (any positive integers)
 The number of counts per Scaled process..
 The default mode '0' simply says if count > 0 scale the proc to 1. if count is 0, scale the proc to 0
 However if the COUNT_BOUNDARY is a positive integer, we use this to determine how many processes to scale to
