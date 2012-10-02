@@ -1,4 +1,5 @@
-heroku-worker-scalar
+heroku-proc-scalar
 ====================
 
-Tools for scaling heroku worker processes
+Scale heroku processes for multiple heroku apps based on api call to each app
+A sample api view can be found in the examples directory

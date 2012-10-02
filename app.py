@@ -8,5 +8,5 @@ Base = declarative_base()
 class App(Base):
     __tablename__ = 'app'
     appname = Column('appname', String(30), primary_key=True)
-    domain = Column('domain', String(150), nullable=True)
-    url_path = Column('url_path', String(150), nullable=True)
+    domain = Column('domain', String(150), nullable=True, default="%s.herokuapp.com" % appname)
+    url_path = Column('url_path', String(150), nullable=True, default="/api/proc_tasks")

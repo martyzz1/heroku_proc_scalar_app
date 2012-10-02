@@ -10,13 +10,16 @@ from app import App
 
 
 @task
-def add_app(appname, domain=False, url_path=False):
+def add_app(appname, domain=False, url_path='/api/proc_tasks'):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)
     session = Session()
 
     app = session.query(App).filter_by(appname=appname).first()
+
+    if domain is False:
+        domain = "%s.herokuapp.com" % appname
 
     if app is not None:
         print "App '%s' already exists, updating it with domain = %s and url_path = %s" % (appname, domain, url_path)
