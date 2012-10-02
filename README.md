@@ -1,5 +1,5 @@
 heroku-proc-scalar
-====================
+------------------
 
 Scale heroku processes for multiple heroku apps based on api call to each app.
 
@@ -18,7 +18,7 @@ The count can be representative of anything you want. For me, I use this as a co
 when the count is 0 I scale the process to 0 to save me some money. 
 
 Configuration options
----------------------
+=====================
 
 The following Environment Variables can be configured to tweak the behaviour of the worker process
 configure this by setting your local envinronment variable, or on heroku using
@@ -27,7 +27,7 @@ configure this by setting your local envinronment variable, or on heroku using
     heroku config:set COUNT_BOUNDARY=10 [--app <herokscalarapp>]
 
 DATABASE_URL
-------------
+============
 
 This Specifies your postgres database url. You can get one by adding any of the postgres addons in heroku, then query your heroku config and copy the default configured URL to this variable e.g.
 
@@ -44,12 +44,12 @@ This Specifies your postgres database url. You can get one by adding any of the 
     HEROKU_POSTGRESQL_BLACK_URL: postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
 
 SLEEP_PERIOD  = 10 (positive integer)
--------------------------------------
+=====================================
 The number of seconds the scalar will sleep before recommencing its polling of ALL configured apps
 
 
 COUNT_BOUNDARY = 0  (any positive integers)
--------------------------------------------
+===========================================
 The number of counts per Scaled process..
 The default mode '0' simply says if count > 0 scale the proc to 1. if count is 0, scale the proc to 0.
 
@@ -68,7 +68,7 @@ e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we wou
 
 
 Adding an app to be scaled
-===========================
+--------------------------
 
 The supplied fabric.py file contains the following functions
 
@@ -80,7 +80,7 @@ e.g.
 herokscalarapp is the name of the heroku app where you are deploying the scalar to run. You will only have to specify this is you have more than one configured in your .git/config
 
 initialise_project
-------------------
+==================
 
 Call this to create the projects database table
 
@@ -91,7 +91,7 @@ e.g.
 
 
 add_app
--------
+========
 takes the following params
 appname = name of the app you want to monitor and scale
 app_api_url = optional url for specifying what url the scalar will query for its process information
@@ -111,7 +111,7 @@ N.B. If you wish to specify a username and a password for accessing your app's a
     
 
 del_app
--------
+=======
 Removes an app from being scaled and monitored
 
 
