@@ -2,7 +2,7 @@ import os
 import time
 import math
 import heroku
-from requests import requests
+import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app import App
@@ -13,9 +13,12 @@ COUNT_BOUNDARY = os.environ.get('COUNT_BOUNDARY', 0)
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 
 assert(DATABASE_URL)
-assert(SLEEP_PERIOD)
-assert(COUNT_BOUNDARY)
 assert(HEROKU_API_KEY)
+
+print "[worker] ini using COUNT_BOUNDARY=%s" % COUNT_BOUNDARY
+print "[worker] ini using DATABASE_URL=%s" % DATABASE_URL
+print "[worker] ini using SLEEP_PERIOD=%s" % SLEEP_PERIOD
+print "[worker] ini using HEROKU_API_KEY=%s" % HEROKU_API_KEY
 
 
 def _get_database():

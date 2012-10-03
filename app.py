@@ -11,4 +11,3 @@ class App(Base):
     app_api_url = Column('app_api_url', String(250))
     username = Column('username', String(50), nullable=True)
     password = Column('password', String(50), nullable=True)
-    heroku_api_key = Column('heroku_api_key', String(100), nullable=False)
