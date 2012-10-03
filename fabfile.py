@@ -7,7 +7,7 @@ from app import App
 
 
 @task
-def add_app(appname, app_api_url=False):
+def add_app(appname, heroku_api_key, app_api_url=False):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)
@@ -17,9 +17,10 @@ def add_app(appname, app_api_url=False):
 
     if app is not None:
         print "App '%s' already exists, updating it" % appname
+        app.heroku_api_key = heroku_api_key
     else:
         print "Configuring new app for '%s'" % (appname)
-        app = App(appname=appname)
+        app = App(appname=appname, heroku_api_key=heroku_api_key)
         session.add(app)
 
     full_url = "http://%s.herokuapp.com/api/proc_count" % appname

@@ -43,6 +43,11 @@ This Specifies your postgres database url. You can get one by adding any of the 
     DATABASE_URL:                postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
     HEROKU_POSTGRESQL_BLACK_URL: postgres://someuser:somepass@ec2-54-243-233-85.compute-1.amazonaws.com:5432/somepath
 
+HEROKU_API_KEY  = <KEY>
+=====================================
+Your Heroku api key found under your account at https://dashboard.heroku.com/account>
+
+
 SLEEP_PERIOD  = 10 (positive integer)
 =====================================
 The number of seconds the scalar will sleep before recommencing its polling of ALL configured apps
@@ -94,6 +99,7 @@ add_app
 ========
 takes the following params
 appname = name of the app you want to monitor and scale
+heroku_api_key = Your Heroku API Key
 app_api_url = optional url for specifying what url the scalar will query for its process information
     default = http://<appname>.herokuapp.com/api/scalar_tasks/
 
