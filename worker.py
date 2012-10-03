@@ -7,6 +7,7 @@ import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app import App
+from pprint import pprint
 
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
 SLEEP_PERIOD = os.environ.get('SLEEP_PERIOD', 10)
@@ -32,41 +33,54 @@ def _get_database():
 def process_apps(app, heroku_conn):
 
     data = get_data(app)
+    pprint(data)
     if not data:
         return
 
-    for procname, count in data:
-        if procname not in heroku_conn.apps:
-            print "[ERROR] %s is not available via your configured HEROKU_API %s" % (app.appname, HEROKU_API_KEY)
-        else:
+    for procname, count in data.iteritems():
+        try:
             heroku_app = heroku_conn.apps[app.appname]
-            new_process_count = check_for_scaling(heroku_app, count)
-            if not new_process_count:
-                break
-            else:
-                print "Scaling %s dyno process %s to %d" % (app.appname, procname, new_process_count)
-                scale_dyno(heroku_app, procname, new_process_count)
+        except KeyError:
+            print "[ERROR] %s is not available via your configured HEROKU_API %s" % (app.appname, HEROKU_API_KEY)
+            pprint(heroku_conn.apps)
+            pprint(heroku_conn.apps[app.appname])
+        else:
+            print "Checking for scaling on %s" % app.appname
+            check_for_scaling(heroku_conn, heroku_app, app.appname, procname, count)
 
 
-def scale_dyno(heroku_app, procname, count):
-    heroku_app.processes[procname].scale(count)
+def scale_dyno(heroku_conn, heroku_app, appname, procname, count):
+    try:
+        heroku_app.processes[procname].scale(count)
+    except KeyError:
+        #this means the prc isn't running - bug in heroku api methinks
+        # see http://samos-it.com/only-use-worker-when-required-on-heroku-with-djangopython/
+        heroku_conn._http_resource(method='POST', resource=('apps', appname, 'ps', 'scale'), data={'type': procname, 'qty': count})
 
 
-def get_current_dynos(heroku_app):
-    web_proc = heroku_app.processes['web']
-    cpt = 0
-    for proc in web_proc:
-        cpt += 1
+def get_current_dynos(heroku_app, procname):
+    try:
+        web_proc = heroku_app.processes[procname]
+    except KeyError:
+        return 0
+    else:
+        cpt = 0
+        for proc in web_proc:
+            cpt += 1
 
-    return cpt
+        return cpt
 
 
-def check_for_scaling(heroku_app, count):
+def check_for_scaling(heroku_conn, heroku_app, appname, procname, count):
     required_count = calculate_required_dynos(count)
-    current_dyno_count = int(get_current_dynos(heroku_app))
+    current_dyno_count = int(get_current_dynos(heroku_app, procname))
+
+    print "count = %s" % count
+    print "current_dyno_count = %s" % current_dyno_count
 
     if not current_dyno_count == required_count:
-        scale_dyno(heroku_app, required_count)
+        print "Scaling %s dyno process %s to %d" % (heroku_app, procname, required_count)
+        scale_dyno(heroku_conn, heroku_app, appname, procname, required_count)
 
 
 def calculate_required_dynos(count):
