@@ -37,9 +37,9 @@ def process_apps(app, heroku_conn):
     if not data:
         return
 
-    for procname, info in data.iteritems():
-        count = info['count']
-        active_count = info['active']
+    for procname in data.iterkeys():
+        count = data[procname]['count']
+        active_count = data[procname]['active']
         try:
             heroku_app = heroku_conn.apps[app.appname]
         except KeyError:
@@ -70,7 +70,7 @@ def shutdown_app(heroku_conn, app, procname):
 
     heroku_app = heroku_conn.apps[app.appname]
     print "[%s] shutting down processes %s" % (app.appname, procname)
-    heroku_app.run_sync("fab shutdown_celery_process:%s" % procname)
+    heroku_app.run_async("fab shutdown_celery_process:%s" % procname)
     #is it already running?
     #if get_current_dynos(heroku_app, control_app):
         #print "[%s]  WARN - control_app is already in the process of shutting down processes, doing nothing" % app.appname
@@ -86,8 +86,10 @@ def get_current_dynos(heroku_app, procname):
     except KeyError:
         return 0
     else:
+
         cpt = 0
         for proc in web_proc:
+            pprint(proc.state)
             cpt += 1
 
         return cpt
