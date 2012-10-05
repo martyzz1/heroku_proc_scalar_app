@@ -17,10 +17,10 @@ HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 assert(DATABASE_URL)
 assert(HEROKU_API_KEY)
 
-print "[worker] ini using COUNT_BOUNDARY=%s" % COUNT_BOUNDARY
-print "[worker] ini using DATABASE_URL=%s" % DATABASE_URL
-print "[worker] ini using SLEEP_PERIOD=%s" % SLEEP_PERIOD
-print "[worker] ini using HEROKU_API_KEY=%s" % HEROKU_API_KEY
+print "[INIT] using COUNT_BOUNDARY=%s" % COUNT_BOUNDARY
+print "[INIT] using DATABASE_URL=%s" % DATABASE_URL
+print "[INIT] using SLEEP_PERIOD=%s" % SLEEP_PERIOD
+print "[INIT] using HEROKU_API_KEY=%s" % HEROKU_API_KEY
 
 
 def _get_database():
@@ -37,6 +37,9 @@ def process_apps(app, heroku_conn):
     if not data:
         return
 
+    active_tasks = data['active_tasks']
+    del data['active_tasks']
+
     for procname, count in data.iteritems():
         try:
             heroku_app = heroku_conn.apps[app.appname]
@@ -45,17 +48,36 @@ def process_apps(app, heroku_conn):
             pprint(heroku_conn.apps)
             pprint(heroku_conn.apps[app.appname])
         else:
-            print "Checking for scaling on %s" % app.appname
-            check_for_scaling(heroku_conn, heroku_app, app.appname, procname, count)
+            print "\n\n[%s] Checking for scaling on %s" % (app.appname, procname)
+            check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_tasks)
 
 
-def scale_dyno(heroku_conn, heroku_app, appname, procname, count):
-    try:
-        heroku_app.processes[procname].scale(count)
-    except KeyError:
-        #this means the prc isn't running - bug in heroku api methinks
-        # see http://samos-it.com/only-use-worker-when-required-on-heroku-with-djangopython/
-        heroku_conn._http_resource(method='POST', resource=('apps', appname, 'ps', 'scale'), data={'type': procname, 'qty': count})
+def scale_dyno(heroku_conn, heroku_app, app, procname, count):
+    appname = app.appname
+
+    if count == 0:
+        #we need to call the shutdown control_app
+        shutdown_app(heroku_conn, app)
+    else:
+        try:
+            heroku_app.processes[procname].scale(count)
+        except KeyError:
+            #this means the prc isn't running - bug in heroku api methinks
+            # see http://samos-it.com/only-use-worker-when-required-on-heroku-with-djangopython/
+            heroku_conn._http_resource(method='POST', resource=('apps', appname, 'ps', 'scale'), data={'type': procname, 'qty': count})
+
+
+def shutdown_app(heroku_conn, app):
+    control_app = app.control_app
+
+    heroku_app = heroku_conn.apps[app.appname]
+    #is it already running?
+    if get_current_dynos(heroku_app, control_app):
+        print "[%s]  WARN - control_app is already in the process of shutting down processes, doing nothing" % app.appname
+    else:
+        #start the control_app
+        print "[%s] starting control_app %s to shutdown processes" % (app.appname, control_app)
+        scale_dyno(heroku_conn, heroku_app, app, control_app, 1)
 
 
 def get_current_dynos(heroku_app, procname):
@@ -71,16 +93,21 @@ def get_current_dynos(heroku_app, procname):
         return cpt
 
 
-def check_for_scaling(heroku_conn, heroku_app, appname, procname, count):
+def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_tasks):
+    appname = app.appname
+
     required_count = calculate_required_dynos(count)
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
-    print "count = %s" % count
-    print "current_dyno_count = %s" % current_dyno_count
+    print "[%s] current task count for %s = %s" % (appname, procname, count)
+    print "[%s] current_dyno_count for %s = %s" % (appname, procname, current_dyno_count)
 
     if not current_dyno_count == required_count:
-        print "Scaling %s dyno process %s to %d" % (heroku_app, procname, required_count)
-        scale_dyno(heroku_conn, heroku_app, appname, procname, required_count)
+        print "[%s] Scaling dyno process %s to %d" % (appname, procname, required_count)
+        if required_count == 0 and active_tasks > 0:
+            print "[%s] Not Scaling %s dyno to 0 yet as it still has %s active tasks" % (appname, procname, active_tasks)
+        else:
+            scale_dyno(heroku_conn, heroku_app, app, procname, required_count)
 
 
 def calculate_required_dynos(count):
@@ -125,5 +152,5 @@ while(True):
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
     for app in apps:
         process_apps(app, heroku_conn)
-    print "sleeping for %f" % SLEEP_PERIOD
+    print "[INFO] sleeping for %f" % SLEEP_PERIOD
     time.sleep(SLEEP_PERIOD)
