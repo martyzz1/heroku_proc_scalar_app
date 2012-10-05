@@ -57,7 +57,7 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
 
     if count == 0:
         #we need to call the shutdown control_app
-        shutdown_app(heroku_conn, app)
+        shutdown_app(heroku_conn, app, procname)
     else:
         try:
             heroku_app.processes[procname].scale(count)
@@ -67,17 +67,19 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
             heroku_conn._http_resource(method='POST', resource=('apps', appname, 'ps', 'scale'), data={'type': procname, 'qty': count})
 
 
-def shutdown_app(heroku_conn, app):
+def shutdown_app(heroku_conn, app, procname):
     control_app = app.control_app
 
     heroku_app = heroku_conn.apps[app.appname]
+    print "[%s] shutting down processes %s" % (app.appname, procname)
+    heroku_app.run_sync("fab shutdown_celery_process:%s" % procname)
     #is it already running?
-    if get_current_dynos(heroku_app, control_app):
-        print "[%s]  WARN - control_app is already in the process of shutting down processes, doing nothing" % app.appname
-    else:
+    #if get_current_dynos(heroku_app, control_app):
+        #print "[%s]  WARN - control_app is already in the process of shutting down processes, doing nothing" % app.appname
+    #else:
         #start the control_app
-        print "[%s] starting control_app %s to shutdown processes" % (app.appname, control_app)
-        scale_dyno(heroku_conn, heroku_app, app, control_app, 1)
+        #print "[%s] starting control_app %s to shutdown processes" % (app.appname, control_app)
+        #scale_dyno(heroku_conn, heroku_app, app, control_app, 1)
 
 
 def get_current_dynos(heroku_app, procname):
