@@ -37,10 +37,9 @@ def process_apps(app, heroku_conn):
     if not data:
         return
 
-    active_tasks = data['active_tasks']
-    del data['active_tasks']
-
-    for procname, count in data.iteritems():
+    for procname, info in data.iteritems():
+        count = info['count']
+        active_count = info['active']
         try:
             heroku_app = heroku_conn.apps[app.appname]
         except KeyError:
@@ -49,7 +48,7 @@ def process_apps(app, heroku_conn):
             pprint(heroku_conn.apps[app.appname])
         else:
             print "\n\n[%s] Checking for scaling on %s" % (app.appname, procname)
-            check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_tasks)
+            check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_count)
 
 
 def scale_dyno(heroku_conn, heroku_app, app, procname, count):
@@ -68,7 +67,6 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
 
 
 def shutdown_app(heroku_conn, app, procname):
-    control_app = app.control_app
 
     heroku_app = heroku_conn.apps[app.appname]
     print "[%s] shutting down processes %s" % (app.appname, procname)

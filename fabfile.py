@@ -7,7 +7,7 @@ from app import App
 
 
 @task
-def add_app(appname, control_app, app_api_url=False):
+def add_app(appname, app_api_url=False):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)
@@ -22,7 +22,7 @@ def add_app(appname, control_app, app_api_url=False):
         app = App(appname=appname)
         session.add(app)
 
-    app.control_app = control_app
+    #app.control_app = control_app
     full_url = "http://%s.herokuapp.com/api/proc_count" % appname
 
     if app_api_url:

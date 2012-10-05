@@ -8,7 +8,6 @@ Base = declarative_base()
 class App(Base):
     __tablename__ = 'app'
     appname = Column('appname', String(30), primary_key=True)
-    control_app = Column('control_app', String(100))
     app_api_url = Column('app_api_url', String(250))
     username = Column('username', String(50), nullable=True)
     password = Column('password', String(50), nullable=True)
