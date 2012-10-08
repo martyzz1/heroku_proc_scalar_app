@@ -8,14 +8,45 @@ A sample api python view can be found in the examples directory.
 In essence it expects a json response which contains a simple result list of "procname" to "count" like this:-
 
     {
-        'celeryd':2,
-        'celerybd':99,
-        'someotherproc':0
+        "celeryd": {
+            "count": 2, 
+            "active": 0
+        }, 
+        "celerybd": {
+            "count": 99, 
+            "active": 0
+        }, 
+        "celery_other": {
+            "count": 0, 
+            "active": 1
+        },
+        "someotherproc": {
+            "count": 0, 
+            "active": 0
+        }
     }
 
 The procname is the name of the process configured in your app's Procfile.
-The count can be representative of anything you want. For me, I use this as a counter of the number of tasks in a Celery Queue. The idea being that 
-when the count is 0 I scale the process to 0 to save me some money. 
+The count can be representative of anything you want. For me, I use this as a counter of the number of tasks in a Celery Queue. The idea being that when the count is 0 I scale the process to 0 to save me some money. 
+
+
+Quick Setup
+===========
+
+    1. create a heroku app
+    2. Clone this repository
+    3. Configure your checkout to push to your heroku app
+    4. issue a heroku deploy
+        git push heroku master
+    5. initialise the app (using the heroku CLI)
+        heroku config:set DATABASE_URL=<your db_url> HEROKU_API_KEY=<your key> COUNT_BOUNDARY=1 SLEEP_PERIOD=10
+        heroku run fab initialise_project
+    6. Add your app to be monitored
+        heroku run fab initialise_project
+        heroku run fab add_app:<yourappname>[,<your api_url>]   
+    7. Scale up your worker
+        heroku ps:scale worker=1
+
 
 Configuration options
 =====================
@@ -62,6 +93,7 @@ e.g.  if the COUNT_BOUNDARY = 0(default)  and the returned json is as above, the
 
     'celeryd' to 1 worker
     'celerybd' to 1 workers
+    'celery_other' to 1 workers - until the active tasks finishes
     'someotherproc' to 0 workers
 
 However if the COUNT_BOUNDARY is a positive integer, we use this to determine how many processes to scale to - loosly- using ROUND(INT(count/COUNT_BOUNDARY))
@@ -69,6 +101,7 @@ e.g.  if the COUNT_BOUNDARY = 10  and the returned json is as above, then we wou
 
     'celeryd' to 1 worker
     'celerybd' to 10 workers
+    'celery_other' to 1 workers - until the active tasks finishes
     'someotherproc' to 0 workers
 
 
@@ -99,7 +132,6 @@ add_app
 ========
 takes the following params
 appname = name of the app you want to monitor and scale
-heroku_api_key = Your Heroku API Key
 app_api_url = optional url for specifying what url the scalar will query for its process information
     default = http://<appname>.herokuapp.com/api/scalar_tasks/
 
@@ -123,4 +155,5 @@ Removes an app from being scaled and monitored
 
 e.g. 
     heroku run del_app:<appname> [--app herokscalarapp]
+
 
