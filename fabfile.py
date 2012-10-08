@@ -26,6 +26,7 @@ def add_app(appname, app_api_url=False):
     full_url = "http://%s.herokuapp.com/api/proc_count" % appname
 
     if app_api_url:
+        print "Got app_api url %s" % app_api_url
         url = urlparse(app_api_url)
         hostname = url.hostname
         scheme = url.scheme
