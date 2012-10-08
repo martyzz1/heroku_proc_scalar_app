@@ -78,7 +78,7 @@ This Specifies your postgres database url. You can get one by adding any of the 
 
 HEROKU_API_KEY  = <KEY>
 =====================================
-Your Heroku api key found under your account at https://dashboard.heroku.com/account>
+Your Heroku api key found under your account at https://dashboard.heroku.com/account
 
 
 SLEEP_PERIOD  = 10 (positive integer)
