@@ -1,9 +1,11 @@
 heroku-proc-scalar
 ------------------
 
-Scale heroku processes for multiple heroku apps based on api call to each app.
+Heroku app for remotely Scaling heroku worker processes for multiple heroku apps based on api call to each app.
+This app is designed to be run in conjunction with a server side api.
+An Example app for controling CELERY workers (using REDIS backend) can be found here
 
-A sample api python view can be found in the examples directory.
+    https://github.com/martyzz1/heroku_proc_scalar
 
 In essence it expects a json response which contains a simple result list of "procname" to "count" like this:-
 
