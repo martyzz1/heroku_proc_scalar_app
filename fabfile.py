@@ -50,11 +50,11 @@ def add_app(appname, app_api_url=False):
     app.app_api_url = full_url
 
     session.commit()
-    print "Updated %s to :-\n" % appname
-    print "appname = %s\n" % app.appname
-    print "app_api_url = %s\n" % app.app_api_url
-    print "username = %s\n" % app.username
-    print "password = %s\n" % app.password
+    print "Updated %s to :-" % appname
+    print "appname = %s" % app.appname
+    print "app_api_url = %s" % app.app_api_url
+    print "username = %s" % app.username
+    print "password = %s" % app.password
 
 
 @task
