@@ -5,12 +5,12 @@ import math
 import heroku
 import requests
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from app import App
 from pprint import pprint
 
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
-SLEEP_PERIOD = os.environ.get('SLEEP_PERIOD', 10)
+SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 10))
 COUNT_BOUNDARY = os.environ.get('COUNT_BOUNDARY', 0)
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 
@@ -69,8 +69,24 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
 def shutdown_app(heroku_conn, app, procname):
 
     heroku_app = heroku_conn.apps[app.appname]
-    print "[%s] shutting down processes %s" % (app.appname, procname)
-    heroku_app.run_async("fab shutdown_celery_process:%s" % procname)
+    running_already = 0
+    cmd = "fab shutdown_celery_process:%s" % procname
+    pprint(heroku_app.processes)
+    try:
+        web_proc = heroku_app.processes['run']
+    except KeyError:
+        running_already = 0
+    else:
+        print "possibly got running process, checking for %s" % cmd
+        for proc in web_proc:
+            if proc.command == cmd:
+                running_already = 1
+
+    if running_already == 1:
+        print "[%s] Shutdown command already running... skipping...."
+    else:
+        print "[%s] shutting down processes %s" % (app.appname, procname)
+        heroku_app.run_async(cmd)
     #is it already running?
     #if get_current_dynos(heroku_app, control_app):
         #print "[%s]  WARN - control_app is already in the process of shutting down processes, doing nothing" % app.appname
@@ -146,7 +162,7 @@ def get_data(app):
 
 
 engine = _get_database()
-Session = sessionmaker(bind=engine)
+Session = scoped_session(sessionmaker(bind=engine))
 while(True):
     print "==============================================================================="
     session = Session()
