@@ -23,7 +23,7 @@ def add_app(appname, app_api_url=False):
         session.add(app)
 
     #app.control_app = control_app
-    full_url = "http://%s.herokuapp.com/api/proc_count" % appname
+    full_url = "http://%s.herokuapp.com/heroku_proc_scalar/proc_count" % appname
 
     if app_api_url:
         print "Got app_api url %s" % app_api_url
