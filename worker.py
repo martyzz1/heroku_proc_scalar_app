@@ -48,7 +48,7 @@ def process_apps(app, heroku_conn):
             print "\n[ERROR] %s is not available via your configured HEROKU_API %s.\nAvailable apps are:-\n" % (app.appname, HEROKU_API_KEY)
             pprint(heroku_conn.apps)
         else:
-            print "\r[%s] Checking for scaling on %s".ljust(max_str_length) % (app.appname, procname),
+            #print "\r[%s] Checking for scaling on %s".ljust(max_str_length) % (app.appname, procname),
             check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_count)
 
 
@@ -78,15 +78,15 @@ def shutdown_app(heroku_conn, app, procname):
     except KeyError:
         running_already = 0
     else:
-        print "\rpossibly got running process, checking for %s".ljust(max_str_length) % cmd,
+        #print "\rpossibly got running process, checking for %s".ljust(max_str_length) % cmd,
         for proc in web_proc:
             if proc.command == cmd:
                 running_already = 1
 
     if running_already == 1:
-        print "\r[%s] Shutdown command for %s already running... skipping....".ljust(max_str_length) % (app.appname, procname)
+        print "[%s] Shutdown command for %s already running... skipping....".ljust(max_str_length) % (app.appname, procname)
     else:
-        print "\r[%s] shutting down processes %s".ljust(max_str_length) % (app.appname, procname)
+        print "[%s] shutting down processes %s".ljust(max_str_length) % (app.appname, procname)
         heroku_app.run_async(cmd)
 
 
@@ -111,12 +111,12 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
     required_count = calculate_required_dynos(count)
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
-    print "\r[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count),
+    #print "\r[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count),
 
     if not current_dyno_count == required_count:
-        print "\r[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count),
+        #print "\r[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count),
         if required_count == 0 and active_tasks > 0:
-            print "\r[%s] Not shutting down %s dyno yet as it still has %s active tasks".ljust(max_str_length) % (appname, procname, active_tasks),
+            print "[%s] Not shutting down %s dyno yet as it still has %s active tasks".ljust(max_str_length) % (appname, procname, active_tasks)
         else:
             scale_dyno(heroku_conn, heroku_app, app, procname, required_count)
 
@@ -139,14 +139,14 @@ def get_data(app):
 
     r = ''
     if app.username or app.password:
-        print "\r[%s]Loading data, using authentication method please wait.....".ljust(max_str_length) % app.appname,
+        #print "\r[%s]Loading data, using authentication method please wait.....".ljust(max_str_length) % app.appname,
         r = requests.get(app.app_api_url, auth=(app.user, app.password))
         if not r.status_code == 200:
             print "\n[ERROR] %s call to %s with user = %s and password = %s Returned response code %s and the following message" % (app.appname, app.app_api_url, app.username, app.password, r.status_code)
             print r.text
             return
     else:
-        print "\r[%s]Loading data, please wait.....".ljust(max_str_length) % app.appname,
+        #print "\r[%s]Loading data, please wait.....".ljust(max_str_length) % app.appname,
         r = requests.get(app.app_api_url)
         if not r.status_code == 200:
             print "[ERROR] %s call to %s without user or password Returned response code %s and the following message" % (app.appname, app.app_api_url, r.status_code)
@@ -159,11 +159,11 @@ def get_data(app):
 engine = _get_database()
 Session = scoped_session(sessionmaker(bind=engine))
 while(True):
-    print "\rBeginning Run............. ".ljust(max_str_length),
+    #print "\rBeginning Run............. ".ljust(max_str_length),
     session = Session()
     apps = session.query(App).all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
     for app in apps:
         process_apps(app, heroku_conn)
-    print "\rCycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD,
+    #print "\rCycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD,
     time.sleep(SLEEP_PERIOD)
