@@ -114,7 +114,7 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
     #print "\r[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count),
 
     if not current_dyno_count == required_count:
-        #print "\r[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count),
+        print "[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count)
         if required_count == 0 and active_tasks > 0:
             print "[%s] Not shutting down %s dyno yet as it still has %s active tasks".ljust(max_str_length) % (appname, procname, active_tasks)
         else:
