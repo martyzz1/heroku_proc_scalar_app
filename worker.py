@@ -14,7 +14,7 @@ SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 10))
 COUNT_BOUNDARY = os.environ.get('COUNT_BOUNDARY', 0)
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 
-max_str_length = 90
+max_str_length = 180
 
 assert(DATABASE_URL)
 assert(HEROKU_API_KEY)
