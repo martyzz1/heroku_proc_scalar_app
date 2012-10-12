@@ -23,7 +23,7 @@ def add_app(appname, app_api_url=False):
         session.add(app)
 
     #app.control_app = control_app
-    full_url = "http://%s.herokuapp.com/heroku_proc_scalar/proc_count" % appname
+    full_url = "https://%s.herokuapp.com/heroku_proc_scalar/proc_count" % appname
 
     if app_api_url:
         print "Got app_api url %s" % app_api_url
@@ -31,7 +31,7 @@ def add_app(appname, app_api_url=False):
         hostname = url.hostname
         scheme = url.scheme
         if scheme is None:
-            scheme = 'http'
+            scheme = 'https'
         port = url.port
         if port is not None:
             port = ":%s" % port
