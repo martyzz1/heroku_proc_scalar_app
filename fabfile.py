@@ -73,6 +73,17 @@ def del_app(appname):
 
 
 @task
+def list_apps():
+    engine = _get_database()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    apps = session.query(App).all()
+
+    for app in apps:
+        print "\n[%s] %s %s %s\n" % (app.appname, app.app_api_url, app.username, app.password)
+
+
+@task
 def initialise_project():
 
     engine = _get_database()
