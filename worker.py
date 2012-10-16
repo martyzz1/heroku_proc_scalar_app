@@ -48,7 +48,7 @@ def process_apps(app, heroku_conn):
             print "\n[ERROR] %s is not available via your configured HEROKU_API %s.\nAvailable apps are:-\n" % (app.appname, HEROKU_API_KEY)
             pprint(heroku_conn.apps)
         else:
-            #print "\r[%s] Checking for scaling on %s".ljust(max_str_length) % (app.appname, procname),
+            print "[%s] Checking for scaling on %s".ljust(max_str_length) % (app.appname, procname)
             check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_count)
 
 
@@ -78,7 +78,7 @@ def shutdown_app(heroku_conn, app, procname):
     except KeyError:
         running_already = 0
     else:
-        #print "\rpossibly got running process, checking for %s".ljust(max_str_length) % cmd,
+        print "possibly got running process, checking for %s".ljust(max_str_length) % cmd
         for proc in web_proc:
             if proc.command == cmd:
                 running_already = 1
@@ -99,7 +99,7 @@ def get_current_dynos(heroku_app, procname):
 
         cpt = 0
         for proc in web_proc:
-            #pprint(proc.state)
+            print "%s is %s" % (proc, proc.state)
             cpt += 1
 
         return cpt
@@ -111,7 +111,7 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
     required_count = calculate_required_dynos(count)
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
-    #print "\r[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count),
+    print "[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
 
     if not current_dyno_count == required_count:
         print "[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count)
@@ -140,7 +140,7 @@ def get_data(app):
     r = ''
     if app.username or app.password:
         print "[%s]Loading data, using authentication method please wait.....".ljust(max_str_length) % app.appname
-        r = requests.get(app.app_api_url, auth=(app.user, app.password))
+        r = requests.get(app.app_api_url, auth=(app.user, app.password), timeout=5.0)
         if not r.status_code == 200:
             print "\n[ERROR] %s call to %s with user = %s and password = %s Returned response code %s and the following message" % (app.appname, app.app_api_url, app.username, app.password, r.status_code)
             print r.text
@@ -159,11 +159,11 @@ def get_data(app):
 engine = _get_database()
 Session = scoped_session(sessionmaker(bind=engine))
 while(True):
-    #print "\rBeginning Run............. ".ljust(max_str_length),
+    print "Beginning Run............. ".ljust(max_str_length)
     session = Session()
     apps = session.query(App).all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
     for app in apps:
         process_apps(app, heroku_conn)
-    #print "\rCycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD,
+    print "Cycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD
     time.sleep(SLEEP_PERIOD)
