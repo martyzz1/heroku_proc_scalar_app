@@ -3,14 +3,19 @@ import os
 
 IRC_SERVER = os.environ.get('IRC_SERVER', 'irc.freenode.net')
 IRC_PORT = int(os.environ.get('IRC_PORT', '6667'))
-IRC_CHANNEL = os.environ.get('IRC_CHANNEL', '#sharehood')
-IRC_CHANNEL_PASSWORD = os.environ.get('IRC_CHANNEL_PASSWORD')
-IRC_NAME = os.environ.get('IRC_NAME', 'SharehoodProcScalar')
+IRC_CHANNEL = os.environ.get('IRC_CHANNEL', False)
+IRC_CHANNEL_PASSWORD = os.environ.get('IRC_CHANNEL_PASSWORD', False)
+IRC_NAME = os.environ.get('IRC_NAME', 'ProcScalar')
+
+room = "%s %s" % (IRC_CHANNEL, IRC_CHANNEL_PASSWORD)
+print "room = %s" % room
 
 
 def send_irc_message(message):
     def on_welcome(client, event):
-        client.send_notice(IRC_CHANNEL, message)
+        print "[IrcBot] sending message %s" % message
+        #client.join_channel(IRC_CHANNEL, IRC_CHANNEL_PASSWORD)
+        client.send_notice(IRC_CHANNEL, str(message))
         client.quit()
 
     def message_printer(client, event):
@@ -21,10 +26,8 @@ def send_irc_message(message):
 
     # Add the event handlers
     my_client["join"].add_handler(on_welcome)
-    #my_client["channel_message"].add_handler(message_printer)
 
     # Finish setting up the client
-    #my_client.connect(IRC_SERVER, port=IRC_PORT)
-    #my_client.connect("irc.freenode.net", channel="#sharehood insecure")
+    #my_client.connect("irc.freenode.net", channel=room)
     my_client.connect("irc.freenode.net", channel="#hmmsharehoodtest")
     my_client.start()

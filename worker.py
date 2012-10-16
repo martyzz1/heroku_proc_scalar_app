@@ -114,7 +114,7 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
     required_count = calculate_required_dynos(count)
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
-    print "[%s] %s has %s running dynos and %s pending tasks.".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
+    print "[%s] %s has %s running dynos and %s pending tasks".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
 
     if not current_dyno_count == required_count:
         print "[%s] Scaling %s dyno process to %d".ljust(max_str_length) % (appname, procname, required_count)
@@ -162,7 +162,7 @@ def get_data(app):
 engine = _get_database()
 Session = scoped_session(sessionmaker(bind=engine))
 while(True):
-    print "\n\n====================Beginning Run=======================\n".ljust(max_str_length)
+    print "\n\n====================[Beginning Run]=======================\n".ljust(max_str_length)
     session = Session()
     apps = session.query(App).all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
