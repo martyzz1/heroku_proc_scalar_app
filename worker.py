@@ -1,5 +1,6 @@
 import os
 #test
+import IrcBot
 import time
 import math
 import heroku
@@ -59,6 +60,7 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
         #we need to call the shutdown control_app
         shutdown_app(heroku_conn, app, procname)
     else:
+        IrcBot.send_irc_message("[%s] Scaling %s processes to %s" % (appname, procname, count))
         try:
             heroku_app.processes[procname].scale(count)
         except KeyError:
@@ -87,6 +89,7 @@ def shutdown_app(heroku_conn, app, procname):
         print "[%s] Shutdown command for %s already running... skipping....".ljust(max_str_length) % (app.appname, procname)
     else:
         print "[%s] shutting down processes %s".ljust(max_str_length) % (app.appname, procname)
+        IrcBot.send_irc_message("[%s] shutting down processes %s" % (app.appname, procname))
         heroku_app.run_async(cmd)
 
 
