@@ -13,8 +13,6 @@ print "room = %s" % room
 
 def send_irc_message(message):
     def on_welcome(client, event):
-        print "[IrcBot] sending message %s" % message
-        #client.join_channel(IRC_CHANNEL, IRC_CHANNEL_PASSWORD)
         client.send_notice(IRC_CHANNEL, str(message))
         client.quit()
 
