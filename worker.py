@@ -159,7 +159,7 @@ def get_data(app):
 engine = _get_database()
 Session = scoped_session(sessionmaker(bind=engine))
 while(True):
-    print "Beginning Run............. ".ljust(max_str_length)
+    print "\n\n====================Beginning Run=======================\n".ljust(max_str_length)
     session = Session()
     apps = session.query(App).all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
