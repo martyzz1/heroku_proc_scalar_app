@@ -158,3 +158,7 @@ e.g.
     heroku run del_app:<appname> [--app herokscalarapp]
 
 
+list_Apps
+=========
+Lists all apps you are monitoring
+
