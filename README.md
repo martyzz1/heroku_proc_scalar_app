@@ -44,7 +44,6 @@ Quick Setup
         heroku config:set DATABASE_URL=<your db_url> HEROKU_API_KEY=<your key> COUNT_BOUNDARY=1 SLEEP_PERIOD=10
         heroku run fab initialise_project
     6. Add your app to be monitored
-        heroku run fab initialise_project
         heroku run fab add_app:<yourappname>[,<your api_url>]   
     7. Scale up your worker
         heroku ps:scale worker=1
