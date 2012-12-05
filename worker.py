@@ -142,8 +142,8 @@ def get_data(app):
 
     r = ''
     if app.username or app.password:
-        print "[%s]Loading data, using authentication method please wait.....".ljust(max_str_length) % app.appname
-        r = requests.get(app.app_api_url, auth=(app.username, app.password), timeout=5.0)
+        print "[%s]Loading data, using authentication method please wait..... %s ".ljust(max_str_length) % (app.appname, app.app_api_url)
+        r = requests.get(app.app_api_url, auth=(app.username, app.password), timeout=10.0)
         if not r.status_code == 200:
             print "\n[ERROR] %s call to %s with user = %s and password = %s Returned response code %s and the following message" % (app.appname, app.app_api_url, app.username, app.password, r.status_code)
             print r.text
