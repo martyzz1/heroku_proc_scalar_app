@@ -12,7 +12,6 @@ from pprint import pprint
 
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
 SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 10))
-COUNT_BOUNDARY = os.environ.get('COUNT_BOUNDARY', 0)
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 
 max_str_length = 180
@@ -20,7 +19,6 @@ max_str_length = 180
 assert(DATABASE_URL)
 assert(HEROKU_API_KEY)
 
-print "[INIT] using COUNT_BOUNDARY=%s" % COUNT_BOUNDARY
 print "[INIT] using DATABASE_URL=%s" % DATABASE_URL
 print "[INIT] using SLEEP_PERIOD=%s" % SLEEP_PERIOD
 print "[INIT] using HEROKU_API_KEY=%s" % HEROKU_API_KEY
@@ -110,8 +108,10 @@ def get_current_dynos(heroku_app, procname):
 
 def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_tasks):
     appname = app.appname
+    max_dynos = app.max_dynos
+    min_dynos = app.min_dynos
 
-    required_count = calculate_required_dynos(count)
+    required_count = calculate_required_dynos(count, max_dynos, min_dynos, app.count_boundary)
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
     print "[%s] %s has %s running dynos and %s pending tasks".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
@@ -124,18 +124,31 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
             scale_dyno(heroku_conn, heroku_app, app, procname, required_count)
 
 
-def calculate_required_dynos(count):
+def calculate_required_dynos(count, max_dynos, min_dynos, count_boundary):
 
-    if COUNT_BOUNDARY == 0:
+    if count_boundary == 0:
         if count > 0:
             return 1
         else:
-            return 0
+            if count <= min_dynos:
+                print "Min dynos reached"
+                return min_dynos
+            else:
+                return 0
     else:
         if count > 0:
-            return math.ceil(float(count) / float(COUNT_BOUNDARY))
+            calc = math.ceil(float(count) / float(count_boundary))
+            if calc >= max_dynos:
+                print "Max dynos reached"
+                return max_dynos
+            else:
+                return calc
         else:
-            return 0
+            if count <= min_dynos:
+                print "Min dynos reached"
+                return min_dynos
+            else:
+                return 0
 
 
 def get_data(app):

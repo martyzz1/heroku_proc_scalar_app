@@ -11,3 +11,6 @@ class App(Base):
     app_api_url = Column('app_api_url', String(250))
     username = Column('username', String(50), nullable=True)
     password = Column('password', String(50), nullable=True)
+    min_dynos = Column('min_dynos', String(5), nullable=True)
+    max_dynos = Column('max_dynos', String(5), nullable=True)
+    count_boundary = Column('max_dynos', String(1), nullable=True)

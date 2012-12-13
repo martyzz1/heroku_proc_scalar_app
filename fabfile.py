@@ -7,7 +7,7 @@ from app import App
 
 
 @task
-def add_app(appname, app_api_url=False):
+def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary=0):
 
     engine = _get_database()
     Session = sessionmaker(bind=engine)
@@ -48,6 +48,9 @@ def add_app(appname, app_api_url=False):
         full_url = "%s://%s%s%s" % (scheme, hostname, port, path)
 
     app.app_api_url = full_url
+    app.min_dynos = min_dynos
+    app.max_dynos = max_dynos
+    app.count_boundary = count_boundary
 
     session.commit()
     print "Updated %s to :-" % appname
@@ -55,6 +58,9 @@ def add_app(appname, app_api_url=False):
     print "app_api_url = %s" % app.app_api_url
     print "username = %s" % app.username
     print "password = %s" % app.password
+    print "min_dynos = %s" % app.min_dynos
+    print "max_dynos = %s" % app.max_dynos
+    print "count_boundary = %s" % app.count_boundary
 
 
 @task
@@ -80,7 +86,7 @@ def list_apps():
     apps = session.query(App).all()
 
     for app in apps:
-        print "[%s] %s %s %s\n" % (app.appname, app.app_api_url, app.username, app.password)
+        print "[%s]\nurl = %s\nusername = %s\npassword = %s\nmin_dynos = %s\nmax_dynos = %s\ncount_boundary = %s\n\n\n" % (app.appname, app.app_api_url, app.username, app.password, app.min_dynos, app.max_dynos, app.count_boundary)
 
 
 @task
