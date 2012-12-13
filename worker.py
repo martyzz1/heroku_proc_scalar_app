@@ -108,10 +108,10 @@ def get_current_dynos(heroku_app, procname):
 
 def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_tasks):
     appname = app.appname
-    max_dynos = app.max_dynos
-    min_dynos = app.min_dynos
+    max_dynos = int(app.max_dynos)
+    min_dynos = int(app.min_dynos)
 
-    required_count = calculate_required_dynos(count, max_dynos, min_dynos, app.count_boundary)
+    required_count = calculate_required_dynos(count, max_dynos, min_dynos, int(app.count_boundary))
     current_dyno_count = int(get_current_dynos(heroku_app, procname))
 
     print "[%s] %s has %s running dynos and %s pending tasks".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
