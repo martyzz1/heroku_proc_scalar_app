@@ -86,7 +86,13 @@ def list_apps():
     apps = session.query(App).all()
 
     for app in apps:
-        print "[%s]\nurl = %s\nusername = %s\npassword = %s\nmin_dynos = %s\nmax_dynos = %s\ncount_boundary = %s\n\n\n" % (app.appname, app.app_api_url, app.username, app.password, app.min_dynos, app.max_dynos, app.count_boundary)
+        print "appname = %s" % app.appname
+        print "app_api_url = %s" % app.app_api_url
+        print "username = %s" % app.username
+        print "password = %s" % app.password
+        print "min_dynos = %s" % app.min_dynos
+        print "max_dynos = %s" % app.max_dynos
+        print "count_boundary = %s\n\n\n" % app.count_boundary
 
 
 @task

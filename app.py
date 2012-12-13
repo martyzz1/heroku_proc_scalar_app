@@ -13,4 +13,4 @@ class App(Base):
     password = Column('password', String(50), nullable=True)
     min_dynos = Column('min_dynos', String(5), nullable=True)
     max_dynos = Column('max_dynos', String(5), nullable=True)
-    count_boundary = Column('max_dynos', String(1), nullable=True)
+    count_boundary = Column('count_boundary', String(1), nullable=True)
