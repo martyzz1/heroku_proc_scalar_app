@@ -9,6 +9,8 @@ from app import App
 @task
 def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary=0):
 
+    """heroku run fab add_app:martinsharehoodadmin,"https://user:pass@martinsharehoodadmin.herokuapp.com/api/celery_proc_scalar",min_dynos=1,count_boundary=0,max_dynos=5"""
+
     engine = _get_database()
     Session = sessionmaker(bind=engine)
     session = Session()
