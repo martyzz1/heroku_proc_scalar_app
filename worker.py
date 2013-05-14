@@ -100,7 +100,7 @@ def get_current_dynos(heroku_app, procname):
 
         cpt = 0
         for proc in web_proc:
-            print "%s is %s" % (proc, proc.state)
+            #print "%s is %s" % (proc, proc.state)
             cpt += 1
 
         return cpt
@@ -131,7 +131,7 @@ def calculate_required_dynos(count, max_dynos, min_dynos, count_boundary):
             return 1
         else:
             if count <= min_dynos:
-                print "Min dynos reached"
+                #print "Min dynos reached"
                 return min_dynos
             else:
                 return 0
@@ -139,13 +139,13 @@ def calculate_required_dynos(count, max_dynos, min_dynos, count_boundary):
         if count > 0:
             calc = math.ceil(float(count) / float(count_boundary))
             if calc >= max_dynos:
-                print "Max dynos reached"
+                #print "Max dynos reached"
                 return max_dynos
             else:
                 return calc
         else:
             if count <= min_dynos:
-                print "Min dynos reached"
+                #print "Min dynos reached"
                 return min_dynos
             else:
                 return 0
@@ -155,7 +155,7 @@ def get_data(app):
 
     r = ''
     if app.username or app.password:
-        print "[%s]Loading data, using authentication method please wait..... %s ".ljust(max_str_length) % (app.appname, app.app_api_url)
+        #print "[%s]Loading data, using authentication method please wait..... %s ".ljust(max_str_length) % (app.appname, app.app_api_url)
         try:
             r = requests.get(app.app_api_url, auth=(app.username, app.password), timeout=10.0)
         except Exception, e:
@@ -167,7 +167,7 @@ def get_data(app):
             #print r.text
             return
     else:
-        print "[%s]Loading data, please wait.....".ljust(max_str_length) % app.appname
+        #print "[%s]Loading data, please wait.....".ljust(max_str_length) % app.appname
         try:
             r = requests.get(app.app_api_url)
         except Exception, e:
