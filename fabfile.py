@@ -85,7 +85,7 @@ def list_apps():
     engine = _get_database()
     Session = sessionmaker(bind=engine)
     session = Session()
-    apps = session.query(App).all()
+    apps = session.query(App).order_by(App.appname).all()
 
     for app in apps:
         print "appname = %s" % app.appname
