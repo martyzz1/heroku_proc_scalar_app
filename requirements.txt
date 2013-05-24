@@ -7,4 +7,6 @@ python-dateutil==1.5
 requests==0.14.1
 ssh==1.7.14
 wsgiref==0.1.2
--e git://github.com/ojii/heroku.py.git@40e943eeb#egg=heroku_custom
+#-e git://github.com/ojii/heroku.py.git@40e943eeb#egg=heroku_custom
+#-e git://github.com/heroku/heroku.py.git@010a2b2087949fc34e0a3b10d591c9472a5657df#egg=heroku
+-e git://github.com/ojii/heroku.py.git@40e943eeb7d04b08f557db488eca74a5ee11a1f8#egg=heroku-dev

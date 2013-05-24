@@ -88,7 +88,9 @@ def shutdown_app(heroku_conn, app, procname):
     else:
         print "[%s] shutting down processes %s".ljust(max_str_length) % (app.appname, procname)
         IrcBot.send_irc_message("[%s] shutting down processes %s" % (app.appname, procname))
-        heroku_app.run_async(cmd)
+        pprint(heroku_app)
+        #heroku_app.command(cmd)
+        heroku_conn._http_resource(method='POST', resource=('apps', app.appname, 'ps'), data={'command': cmd})
 
 
 def get_current_dynos(heroku_conn, heroku_app, app, procname):
