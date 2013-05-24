@@ -13,7 +13,7 @@ print "room = %s" % room
 
 def send_irc_message(message):
     def on_welcome(client, event):
-        client.send_notice(IRC_CHANNEL, str(message))
+        client.send_notice(str(IRC_CHANNEL), str(message))
         client.quit()
 
     def message_printer(client, event):

@@ -91,7 +91,7 @@ def shutdown_app(heroku_conn, app, procname):
         heroku_app.run_async(cmd)
 
 
-def get_current_dynos(heroku_app, procname):
+def get_current_dynos(heroku_conn, heroku_app, app, procname):
     try:
         web_proc = heroku_app.processes[procname]
     except KeyError:
@@ -101,6 +101,9 @@ def get_current_dynos(heroku_app, procname):
         cpt = 0
         for proc in web_proc:
             #print "%s is %s" % (proc, proc.state)
+            if proc.state == 'crashed':
+                print "%s is crashed - Scaling it down" % procname
+                scale_dyno(heroku_conn, heroku_app, app, procname, 0)
             cpt += 1
 
         return cpt
@@ -112,7 +115,7 @@ def check_for_scaling(heroku_conn, heroku_app, app, procname, count, active_task
     min_dynos = int(app.min_dynos)
 
     required_count = calculate_required_dynos(count, max_dynos, min_dynos, int(app.count_boundary))
-    current_dyno_count = int(get_current_dynos(heroku_app, procname))
+    current_dyno_count = int(get_current_dynos(heroku_conn, heroku_app, app, procname))
 
     print "[%s] %s has %s running dynos and %s pending tasks".ljust(max_str_length) % (appname, procname, current_dyno_count, count)
 
@@ -186,7 +189,7 @@ Session = scoped_session(sessionmaker(bind=engine))
 while(True):
     print "\n\n====================[Beginning Run]=======================\n".ljust(max_str_length)
     session = Session()
-    apps = session.query(App).order_by(App.appname).all()
+    apps = session.query(App).order_by("app_appname").all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
     for app in apps:
         process_apps(app, heroku_conn)
