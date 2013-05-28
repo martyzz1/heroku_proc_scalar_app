@@ -41,6 +41,10 @@ def process_apps(app, heroku_conn):
     for procname in data.iterkeys():
         count = data[procname]['count']
         active_count = data[procname]['active']
+        deployment_locked = data[procname]['deploy_lock']
+        if deployment_locked == 1:
+            print "[%s] %s is locked for deployment, skipping".ljust(max_str_length) % (app.appname, procname)
+            continue
         try:
             heroku_app = heroku_conn.apps[app.appname]
         except KeyError:
