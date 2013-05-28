@@ -42,8 +42,8 @@ def process_apps(app, heroku_conn):
         count = data[procname]['count']
         active_count = data[procname]['active']
         deployment_locked = data[procname]['deploy_lock']
-        if deployment_locked == 1:
-            print "[%s] %s is locked for deployment, skipping".ljust(max_str_length) % (app.appname, procname)
+        if not deployment_locked == 0:
+            print "[%s] %s is locked for %s, skipping".ljust(max_str_length) % (app.appname, procname, deployment_locked)
             continue
         try:
             heroku_app = heroku_conn.apps[app.appname]
