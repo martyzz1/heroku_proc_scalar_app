@@ -1,1 +1,1 @@
-worker: python worker.py
+worker: python proc_scalar/worker.py

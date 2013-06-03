@@ -26,6 +26,5 @@ def send_irc_message(message):
     my_client["join"].add_handler(on_welcome)
 
     # Finish setting up the client
-    #my_client.connect("irc.freenode.net", channel=room)
     my_client.connect("irc.freenode.net", channel="#hmmsharehoodtest")
     my_client.start()

@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Integer
 Base = declarative_base()
 
 
-#http://docs.sqlalchemy.org/en/rel_0_7/orm/tutorial.html#create-an-instance-of-the-mapped-class
+# http://docs.sqlalchemy.org/en/rel_0_7/orm/tutorial.html#create-an-instance-of-the-mapped-class
 class App(Base):
     __tablename__ = 'app'
     appname = Column('appname', String(30), primary_key=True)
