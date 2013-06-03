@@ -167,7 +167,7 @@ def get_data(app):
         try:
             r = requests.get(app.app_api_url, auth=(app.username, app.password), timeout=10.0)
         except Exception, e:
-            print "\n[Error] %s" % e
+            print "\n[Error] %s for %s" % (e, app.app_api_url)
             return
 
         if not r.status_code == 200:
@@ -179,7 +179,7 @@ def get_data(app):
         try:
             r = requests.get(app.app_api_url)
         except Exception, e:
-            print "\n[Error] %s" % e
+            print "\n[Error] %s for %s" % (e, app.app_api_url)
             return
         if not r.status_code == 200:
             print "[ERROR] %s call to %s without user or password Returned response code %s and the following message" % (app.appname, app.app_api_url, r.status_code)
