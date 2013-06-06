@@ -12,6 +12,7 @@ from pprint import pprint
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
 SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 10))
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+NOTIFICATIONS = os.environ.get('NOTIFICATIONS', False)
 
 max_str_length = 180
 
@@ -51,7 +52,8 @@ def scale_dyno(heroku_conn, heroku_app, app, procname, count):
         # we need to call the shutdown control_app
         shutdown_app(heroku_conn, app, procname)
     else:
-        irc.send_irc_message("[%s] Scaling %s processes to %s" % (appname, procname, count))
+        if NOTIFICATIONS:
+            irc.send_irc_message("[%s] Scaling %s processes to %s" % (appname, procname, count))
         try:
             heroku_app.processes[procname].scale(count)
         except KeyError:
@@ -79,7 +81,8 @@ def shutdown_app(heroku_conn, app, procname):
         print "[%s] Shutdown command for %s already running... skipping....".ljust(max_str_length) % (app.appname, procname)
     else:
         print "[%s] shutting down processes %s".ljust(max_str_length) % (app.appname, procname)
-        irc.send_irc_message("[%s] shutting down processes %s" % (app.appname, procname))
+        if NOTIFICATIONS:
+            irc.send_irc_message("[%s] shutting down processes %s" % (app.appname, procname))
         pprint(heroku_app)
         heroku_conn._http_resource(method='POST', resource=('apps', app.appname, 'ps'), data={'command': cmd})
 
