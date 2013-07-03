@@ -3,7 +3,7 @@ from urlparse import urlparse
 from fabric.api import task
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app import App
+from proc_scalar.schema import App
 
 
 @task
