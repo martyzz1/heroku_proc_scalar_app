@@ -1,9 +1,35 @@
 import os
 from urlparse import urlparse
-from fabric.api import task
+from fabric.api import task, abort
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from proc_scalar.schema import App
+
+
+@task
+def set_max_dynos(appname, num):
+    return update_app(appname, {'max_dynos': num})
+
+
+@task
+def set_min_dynos(appname, num):
+    return update_app(appname, {'min_dynos': num})
+
+
+def update_app(appname, settings):
+    engine = _get_database()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    app = session.query(App).filter_by(appname=appname).first()
+
+    if app is None:
+        abort("App {0:s} doesn't exist".format(appname))
+
+    for key in settings.iterkeys():
+        setattr(app, key, settings[key])
+
+    session.commit()
 
 
 @task
