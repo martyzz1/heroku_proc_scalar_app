@@ -187,5 +187,6 @@ while(True):
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
     for app in apps:
         process_apps(app, heroku_conn)
+        time.sleep(3)
     print "Cycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD
     time.sleep(SLEEP_PERIOD)
