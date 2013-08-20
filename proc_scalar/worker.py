@@ -185,6 +185,37 @@ while(True):
     session = Session()
     apps = session.query(App).order_by("app_appname").all()
     heroku_conn = heroku.from_key(HEROKU_API_KEY)
+    print("rate_limit_remaining = {0}".format(heroku_conn.ratelimit_remaining()))
+    #newapp = heroku_conn.create_app(name='martyzz1test', stack='cedar', region_name='us')
+    #pprint(newapp)
+    #pprint(newapp.addons)
+    app = heroku_conn.app('martinsharehoodadmin')
+    for addon in app.addons:
+        print addon.app.name, " - ", addon.plan.name
+
+    app = heroku_conn.app('martyzz1test')
+    for addon in app.addons:
+        print addon.app.name, " - ", addon.plan.name
+
+    addons = heroku_conn.addon_services
+    pprint(addons)
+
+    pg_addon = heroku_conn.addon_services('heroku-postgresql:basic')
+    pprint(pg_addon)
+
+    app.install_addon(plan_name='heroku-postgresql:basic')
+    for addon in app.addons:
+        print addon.app.name, " - ", addon.plan.name
+
+    assert(False)
+    print("rate_limit_remaining = {0}".format(heroku_conn.ratelimit_remaining()))
+    pprint(app.addons)
+    app2 = heroku_conn.apps['martinsharehoodadmin']
+    print("rate_limit_remaining = {0}".format(heroku_conn.ratelimit_remaining()))
+    pprint(app2.addons)
+    print("rate_limit_remaining = {0}".format(heroku_conn.ratelimit_remaining()))
+    #rate_limits = heroku_conn.addons
+    #pprint(rate_limits)
     for app in apps:
         process_apps(app, heroku_conn)
         time.sleep(3)
