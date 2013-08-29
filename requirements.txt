@@ -7,4 +7,4 @@ python-dateutil==1.5
 requests==0.14.1
 ssh==1.7.14
 wsgiref==0.1.2
--e git://github.com/martyzz1/heroku.py.git@f2f7e5ffa15662567f55ac4a04a16fbe70bad769#egg=heroku-dev
+-e git://github.com/martyzz1/heroku.py.git@feature_heroku_api_v3#egg=heroku-dev
