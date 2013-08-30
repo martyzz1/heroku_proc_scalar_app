@@ -16,6 +16,11 @@ def set_min_dynos(appname, num):
     return update_app(appname, {'min_dynos': num})
 
 
+@task
+def set_api_key(appname, key):
+    return update_app(appname, {'api_key': key})
+
+
 def update_app(appname, settings):
     engine = _get_database()
     Session = sessionmaker(bind=engine)

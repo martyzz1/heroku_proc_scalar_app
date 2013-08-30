@@ -183,11 +183,12 @@ while(True):
     my_config = {'verbose': sys.stderr}
     session = requests.session(config=my_config)
     heroku_conn = heroku.from_key(HEROKU_API_KEY, session=session)
-    print "t0"
-    print("rate_limit_remaining = {0}".format(heroku_conn.ratelimit_remaining()))
-    print "t1"
     heroku_apps = heroku_conn.apps()
-    print "t2"
+    rl = heroku_conn.ratelimit_remaining()
+    print "rate_limit_remaining = {0}".format(rl)
+    num_apps = len(apps)
+    if rl < 100:
+            irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0}".format(rl))
     for app in apps:
         try:
             heroku_app = heroku_apps[app.appname]
