@@ -40,9 +40,7 @@ def process_apps(app, heroku_conn, heroku_app):
             print "[%s] %s not found in heroku proc formation, skipping".ljust(max_str_length) % (app.appname, procname)
             continue
 
-        print heroku_procs
         heroku_proc = heroku_procs[procname]
-        print heroku_proc
         if 'deploy_lock' in data[procname] and data[procname]['deploy_lock'] != 0:
             print "[%s] %s is locked for %s, skipping".ljust(max_str_length) % (app.appname, procname, data[procname]['deploy_lock'])
             continue
@@ -84,11 +82,8 @@ def shutdown_app(heroku_conn, heroku_app, heroku_dynos, heroku_proc):
 def get_current_dynos(app, heroku_dynos, heroku_proc):
 
     cpt = 0
-    print heroku_dynos
     if heroku_proc.type in heroku_dynos:
-        print "################"
         for dyno in heroku_dynos[heroku_proc.type]:
-            print "checking dyno {0}".format(dyno.name)
             if dyno.state == 'crashed':
                 #check how long ago and scale it down if it crashed
                 print "[{0}] {1} is crashed - Killing it".format(app.appname, heroku_proc.type)
@@ -182,14 +177,24 @@ while(True):
     apps = session.query(App).order_by("app_appname").all()
     my_config = {'verbose': sys.stderr}
     session = requests.session(config=my_config)
-    heroku_conn = heroku.from_key(HEROKU_API_KEY, session=session)
-    heroku_apps = heroku_conn.apps()
-    rl = heroku_conn.ratelimit_remaining()
-    print "rate_limit_remaining = {0}".format(rl)
-    num_apps = len(apps)
-    if rl < 100:
-            irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0}".format(rl))
     for app in apps:
+        heroku_conn = None
+        rl = None
+        key_type = 'General Key'
+        if app.api_key is None:
+            heroku_conn = heroku.from_key(HEROKU_API_KEY, session=session)
+            rl = heroku_conn.ratelimit_remaining()
+            print "rate_limit_remaining = {0} for Generic API_KEY".format(rl)
+        else:
+            heroku_conn = heroku.from_key(app.api_key, session=session)
+            rl = heroku_conn.ratelimit_remaining()
+            print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
+            key_type = app.api_key
+
+        heroku_apps = heroku_conn.apps()
+        num_apps = len(apps)
+        if rl < 100:
+                irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
         try:
             heroku_app = heroku_apps[app.appname]
         except KeyError:
