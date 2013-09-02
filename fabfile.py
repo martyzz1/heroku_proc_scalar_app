@@ -87,6 +87,14 @@ def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary
     app.max_dynos = max_dynos
     app.count_boundary = count_boundary
 
+    HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+    heroku_conn = heroku.from_key(HEROKU_API_KEY)
+    heroku_app = heroku_conn.app(appname)
+    print "Setting HEROKU_API_KEY directly from {0}".format(appname)
+    config = heroku_app.config()
+    new_api_key = config['HEROKU_API_KEY']
+    app.api_key = new_api_key
+
     session.commit()
     print "Updated %s to :-" % appname
     print "appname = %s" % app.appname
@@ -96,6 +104,7 @@ def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary
     print "min_dynos = %s" % app.min_dynos
     print "max_dynos = %s" % app.max_dynos
     print "count_boundary = %s" % app.count_boundary
+    print "api_key = %s" % app.api_key
 
 
 @task
