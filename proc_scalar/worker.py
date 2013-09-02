@@ -191,14 +191,14 @@ while(True):
             print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
             key_type = app.api_key
 
-        heroku_apps = heroku_conn.apps()
-        num_apps = len(apps)
         if rl < 100 & rl > 90:
                 irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
 
         if rl < 25:
             print "[{0}] skipping due to ratelimit being too low {1}".format(app.appname, rl)
             continue
+        heroku_apps = heroku_conn.apps()
+        num_apps = len(apps)
         try:
             heroku_app = heroku_apps[app.appname]
         except KeyError:
