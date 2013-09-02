@@ -1,4 +1,6 @@
+import heroku
 import os
+from pprint import pprint # NOQA
 from urlparse import urlparse
 from fabric.api import task, abort
 from sqlalchemy import create_engine
@@ -133,6 +135,29 @@ def initialise_project():
 
     engine = _get_database()
     App.metadata.create_all(engine)
+
+
+@task
+def update_api_keys_from_config():
+    engine = _get_database()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    apps = session.query(App).order_by(App.appname).all()
+
+    HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+    heroku_conn = heroku.from_key(HEROKU_API_KEY)
+    heroku_apps = heroku_conn.apps()
+
+    for app in apps:
+        print "checking {0} for api_key".format(app.appname)
+        if app.appname in heroku_apps:
+            config = heroku_apps[app.appname].config()
+            new_api_key = config['HEROKU_API_KEY']
+            if new_api_key:
+                print "[{0}] setting api_key to {1}".format(app.appname, new_api_key)
+                app.api_key = new_api_key
+
+    session.commit()
 
 
 def _get_database():
