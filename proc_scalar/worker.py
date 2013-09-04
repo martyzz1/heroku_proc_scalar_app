@@ -11,7 +11,7 @@ from schema import App
 from pprint import pprint # noqa
 
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
-SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 10))
+SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 300))
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 NOTIFICATIONS = os.environ.get('NOTIFICATIONS', False)
 
@@ -177,6 +177,8 @@ while(True):
     apps = session.query(App).order_by("app_appname").all()
     my_config = {'verbose': sys.stderr}
     session = requests.session(config=my_config)
+
+    ratelimits = {}
     for app in apps:
         heroku_conn = None
         rl = None
@@ -191,12 +193,30 @@ while(True):
             print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
             key_type = app.api_key
 
+        if app.appname in ratelimits:
+            prev_limit = ratelimits[app.appname]['prev_limit']
+            prev_time = ratelimits[app.appname]['prev_time']
+            current_time = time.time()
+            if rl < prev_limit:
+                time_diff = current_time - prev_time
+                if time_diff > SLEEP_PERIOD:
+                    print "[{0}] ratelimit ({1}) is lower than the previous rl ({2}), however no checks have been run for {3} seconds, proceeding....".format(app.appname, rl, prev_limit, time_diff)
+                else:
+                    print "[{0}] skipping due to current ratelimit ({1}) being lower than the previous rl ({2})".format(app.appname, rl, prev_limit)
+                    continue
+            else:
+                print "[{0}] ratelimit ({1}) is greater than the previous rl ({2}), proceeding....".format(app.appname, rl, prev_limit)
+
         if rl < 100 & rl > 90:
                 irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
 
         if rl < 25:
             print "[{0}] skipping due to ratelimit being too low {1}".format(app.appname, rl)
             continue
+
+        applimits = {'prev_limit': rl, 'prev_time': time.time()}
+        ratelimits[app.appname] = applimits
+
         heroku_apps = heroku_conn.apps()
         num_apps = len(apps)
         try:
