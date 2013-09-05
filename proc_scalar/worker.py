@@ -14,6 +14,7 @@ DATABASE_URL = os.environ.get('DATABASE_URL', False)
 SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 300))
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 NOTIFICATIONS = os.environ.get('NOTIFICATIONS', False)
+RATE_LIMIT_INTERVAL = int(os.environ.get('RATE_LIMIT_INTERVAL', 5))
 
 max_str_length = 180
 
@@ -173,10 +174,8 @@ engine = create_engine(DATABASE_URL)
 Session = scoped_session(sessionmaker(bind=engine))
 while(True):
     print "\n\n====================[Beginning Run]=======================\n".ljust(max_str_length)
-    session = Session()
-    apps = session.query(App).order_by("app_appname").all()
-    my_config = {'verbose': sys.stderr}
-    session = requests.session(config=my_config)
+    sqlsession = Session()
+    apps = sqlsession.query(App).order_by("app_appname").all()
 
     ratelimits = {}
     for app in apps:
@@ -184,11 +183,11 @@ while(True):
         rl = None
         key_type = 'General Key'
         if app.api_key is None:
-            heroku_conn = heroku.from_key(HEROKU_API_KEY, session=session)
+            heroku_conn = heroku.from_key(HEROKU_API_KEY)
             rl = heroku_conn.ratelimit_remaining()
             print "rate_limit_remaining = {0} for Generic API_KEY".format(rl)
         else:
-            heroku_conn = heroku.from_key(app.api_key, session=session)
+            heroku_conn = heroku.from_key(app.api_key)
             rl = heroku_conn.ratelimit_remaining()
             print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
             key_type = app.api_key
@@ -197,12 +196,12 @@ while(True):
             prev_limit = ratelimits[app.appname]['prev_limit']
             prev_time = ratelimits[app.appname]['prev_time']
             current_time = time.time()
-            if rl < prev_limit:
+            if (prev_limit - rl) > RATE_LIMIT_INTERVAL:
                 time_diff = current_time - prev_time
                 if time_diff > SLEEP_PERIOD:
-                    print "[{0}] ratelimit ({1}) is lower than the previous rl ({2}), however no checks have been run for {3} seconds, proceeding....".format(app.appname, rl, prev_limit, time_diff)
+                    print "[{0}] ratelimit ({1}) is more than {4} lower than the previous rl ({2}), however no checks have been run for {3} seconds, proceeding....".format(app.appname, rl, prev_limit, time_diff)
                 else:
-                    print "[{0}] skipping due to current ratelimit ({1}) being lower than the previous rl ({2})".format(app.appname, rl, prev_limit)
+                    print "[{0}] skipping due to current ratelimit ({1}) being more than {3} lower than the previous rl ({2})".format(app.appname, rl, prev_limit)
                     continue
             else:
                 print "[{0}] ratelimit ({1}) is greater than the previous rl ({2}), proceeding....".format(app.appname, rl, prev_limit)
