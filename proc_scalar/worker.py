@@ -31,7 +31,6 @@ def process_apps(app, heroku_conn, heroku_app):
     if not data:
         return
 
-    print data
     heroku_dynos = heroku_app.dynos()
     heroku_procs = heroku_app.process_formation()
 
