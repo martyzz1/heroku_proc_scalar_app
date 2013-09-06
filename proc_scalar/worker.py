@@ -31,6 +31,7 @@ def process_apps(app, heroku_conn, heroku_app):
     if not data:
         return
 
+    print data
     heroku_dynos = heroku_app.dynos()
     heroku_procs = heroku_app.process_formation()
 
@@ -167,7 +168,7 @@ def get_data(app):
                     app.appname, app.app_api_url, r.status_code)
             return
 
-    return r.json
+    return r.json()
 
 
 engine = create_engine(DATABASE_URL)
