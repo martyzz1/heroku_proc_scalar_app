@@ -183,10 +183,12 @@ while(True):
         rl = None
         key_type = 'General Key'
         if app.api_key is None:
+            print "[{0}] processing app {0}".format(app.appname, HEROKU_API_KEY)
             heroku_conn = heroku.from_key(HEROKU_API_KEY)
             rl = heroku_conn.ratelimit_remaining()
             print "rate_limit_remaining = {0} for Generic API_KEY".format(rl)
         else:
+            print "[{0}] processing app {1}".format(app.appname, app.api_key)
             heroku_conn = heroku.from_key(app.api_key)
             rl = heroku_conn.ratelimit_remaining()
             print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
