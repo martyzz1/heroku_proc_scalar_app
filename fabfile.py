@@ -1,4 +1,6 @@
+import heroku
 import os
+from pprint import pprint # NOQA
 from urlparse import urlparse
 from fabric.api import task, abort
 from sqlalchemy import create_engine
@@ -14,6 +16,11 @@ def set_max_dynos(appname, num):
 @task
 def set_min_dynos(appname, num):
     return update_app(appname, {'min_dynos': num})
+
+
+@task
+def set_api_key(appname, key):
+    return update_app(appname, {'api_key': key})
 
 
 def update_app(appname, settings):
@@ -80,6 +87,14 @@ def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary
     app.max_dynos = max_dynos
     app.count_boundary = count_boundary
 
+    HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+    heroku_conn = heroku.from_key(HEROKU_API_KEY)
+    heroku_app = heroku_conn.app(appname)
+    print "Setting HEROKU_API_KEY directly from {0}".format(appname)
+    config = heroku_app.config()
+    new_api_key = config['HEROKU_API_KEY']
+    app.api_key = new_api_key
+
     session.commit()
     print "Updated %s to :-" % appname
     print "appname = %s" % app.appname
@@ -89,6 +104,7 @@ def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary
     print "min_dynos = %s" % app.min_dynos
     print "max_dynos = %s" % app.max_dynos
     print "count_boundary = %s" % app.count_boundary
+    print "api_key = %s" % app.api_key
 
 
 @task
@@ -121,6 +137,7 @@ def list_apps():
         print "min_dynos = %s" % app.min_dynos
         print "max_dynos = %s" % app.max_dynos
         print "count_boundary = %s\n\n\n" % app.count_boundary
+        print "api_key = %s\n\n\n" % app.api_key
 
 
 @task
@@ -128,6 +145,29 @@ def initialise_project():
 
     engine = _get_database()
     App.metadata.create_all(engine)
+
+
+@task
+def update_api_keys_from_config():
+    engine = _get_database()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    apps = session.query(App).order_by(App.appname).all()
+
+    HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+    heroku_conn = heroku.from_key(HEROKU_API_KEY)
+    heroku_apps = heroku_conn.apps()
+
+    for app in apps:
+        print "checking {0} for api_key".format(app.appname)
+        if app.appname in heroku_apps:
+            config = heroku_apps[app.appname].config()
+            new_api_key = config['HEROKU_API_KEY']
+            if new_api_key:
+                print "[{0}] setting api_key to {1}".format(app.appname, new_api_key)
+                app.api_key = new_api_key
+
+    session.commit()
 
 
 def _get_database():

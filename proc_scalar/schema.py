@@ -14,3 +14,4 @@ class App(Base):
     min_dynos = Column('min_dynos', Integer(5), nullable=True)
     max_dynos = Column('max_dynos', Integer(5), nullable=True)
     count_boundary = Column('count_boundary', Integer(1), nullable=True)
+    api_key = Column('api_key', String(50), nullable=True)
