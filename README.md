@@ -162,3 +162,8 @@ list_apps
 =========
 Lists all apps you are monitoring
 
+update_api_keys_from_config
+==============
+
+Calling this will look through all your apps' heroku configs (for a HEROKU_API_KEY) and if found, will update and set the same heroku api_key for your app. (so each heroku api call to one of your apps will use the heroku api key for that app).
+This will allow you to use different api_keys for different apps. Reducing the problems with heroku's api_key ratelimitting
