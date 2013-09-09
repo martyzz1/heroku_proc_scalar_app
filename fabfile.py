@@ -137,6 +137,7 @@ def list_apps():
         print "min_dynos = %s" % app.min_dynos
         print "max_dynos = %s" % app.max_dynos
         print "count_boundary = %s\n\n\n" % app.count_boundary
+        print "api_key = %s\n\n\n" % app.api_key
 
 
 @task
