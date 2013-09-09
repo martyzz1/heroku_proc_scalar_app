@@ -208,7 +208,7 @@ while(True):
             else:
                 print "[{0}] ratelimit ({1}) is greater than the previous rl ({2}), proceeding....".format(app.appname, rl, prev_limit)
 
-        if rl < 100 & rl > 90:
+        if (rl < 100) and (rl > 90):
                 irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
 
         if rl < 25:
