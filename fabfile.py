@@ -40,7 +40,7 @@ def update_app(appname, settings):
 
 
 @task
-def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary=0):
+def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary=0, api_key=False):
 
     """heroku run fab add_app:martinsharehoodadmin,"https://user:pass@martinsharehoodadmin.herokuapp.com/api/celery_proc_scalar",min_dynos=1,count_boundary=0,max_dynos=5"""
 
@@ -87,13 +87,16 @@ def add_app(appname, app_api_url=False, min_dynos=0, max_dynos=5, count_boundary
     app.max_dynos = max_dynos
     app.count_boundary = count_boundary
 
-    HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
-    heroku_conn = heroku.from_key(HEROKU_API_KEY)
-    heroku_app = heroku_conn.app(appname)
-    print "Setting HEROKU_API_KEY directly from {0}".format(appname)
-    config = heroku_app.config()
-    new_api_key = config['HEROKU_API_KEY']
-    app.api_key = new_api_key
+    if api_key:
+        app.api_key = api_key
+    else:
+        HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
+        heroku_conn = heroku.from_key(HEROKU_API_KEY)
+        heroku_app = heroku_conn.app(appname)
+        print "Setting HEROKU_API_KEY directly from {0}".format(appname)
+        config = heroku_app.config()
+        new_api_key = config['HEROKU_API_KEY']
+        app.api_key = new_api_key
 
     session.commit()
     print "Updated %s to :-" % appname
