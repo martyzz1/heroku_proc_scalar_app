@@ -63,7 +63,7 @@ def scale_dyno(heroku_conn, heroku_app, heroku_dynos, heroku_proc, count):
 def shutdown_app(heroku_conn, heroku_app, heroku_dynos, heroku_proc):
 
     running_already = 0
-    cmd = "fab shutdown_celery_process:%s" % heroku_proc.type
+    cmd = "fab celery.shutdown_process:%s" % heroku_proc.type
 
     for dyno in heroku_dynos:
         if dyno.command == cmd:
