@@ -4,6 +4,7 @@ SQLAlchemy==0.7.8
 psycopg2==2.4.5
 pycrypto==2.6
 python-dateutil==1.5
+raven==4.0.3
 ssh==1.7.14
 wsgiref==0.1.2
 -e git://github.com/martyzz1/heroku.py.git@dc95800c0dbfc52d37f77d504af25bf190264eff#egg=heroku-dev
