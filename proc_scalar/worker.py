@@ -8,12 +8,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from schema import App
 from pprint import pprint # noqa
+from raven import Client
 
 DATABASE_URL = os.environ.get('DATABASE_URL', False)
 SLEEP_PERIOD = float(os.environ.get('SLEEP_PERIOD', 300))
 HEROKU_API_KEY = os.environ.get('HEROKU_API_KEY', False)
 NOTIFICATIONS = os.environ.get('NOTIFICATIONS', False)
+SENTRY_DSN = os.environ.get('SENTRY_DSN', False)
 RATE_LIMIT_INTERVAL = int(os.environ.get('RATE_LIMIT_INTERVAL', 5))
+
 
 max_str_length = 180
 
@@ -171,60 +174,65 @@ def get_data(app):
 
 engine = create_engine(DATABASE_URL)
 Session = scoped_session(sessionmaker(bind=engine))
-while(True):
-    print "\n\n====================[Beginning Run]=======================\n".ljust(max_str_length)
-    sqlsession = Session()
-    apps = sqlsession.query(App).order_by("app_appname").all()
+client = Client(SENTRY_DSN)
 
-    ratelimits = {}
-    for app in apps:
-        heroku_conn = None
-        rl = None
-        key_type = 'General Key'
-        if app.api_key is None:
-            print "[{0}] processing app {0}".format(app.appname, HEROKU_API_KEY)
-            heroku_conn = heroku.from_key(HEROKU_API_KEY)
-            rl = heroku_conn.ratelimit_remaining()
-            print "rate_limit_remaining = {0} for Generic API_KEY".format(rl)
-        else:
-            print "[{0}] processing app {1}".format(app.appname, app.api_key)
-            heroku_conn = heroku.from_key(app.api_key)
-            rl = heroku_conn.ratelimit_remaining()
-            print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
-            key_type = app.api_key
+try:
+    while(True):
+        print "\n\n====================[Beginning Run]=======================\n".ljust(max_str_length)
+        sqlsession = Session()
+        apps = sqlsession.query(App).order_by("app_appname").all()
 
-        if app.appname in ratelimits:
-            prev_limit = ratelimits[app.appname]['prev_limit']
-            prev_time = ratelimits[app.appname]['prev_time']
-            current_time = time.time()
-            if (prev_limit - rl) > RATE_LIMIT_INTERVAL:
-                time_diff = current_time - prev_time
-                if time_diff > SLEEP_PERIOD:
-                    print "[{0}] ratelimit ({1}) is more than {4} lower than the previous rl ({2}), however no checks have been run for {3} seconds, proceeding....".format(app.appname, rl, prev_limit, time_diff)
-                else:
-                    print "[{0}] skipping due to current ratelimit ({1}) being more than {3} lower than the previous rl ({2})".format(app.appname, rl, prev_limit)
-                    continue
+        ratelimits = {}
+        for app in apps:
+            heroku_conn = None
+            rl = None
+            key_type = 'General Key'
+            if app.api_key is None:
+                print "[{0}] processing app {0}".format(app.appname, HEROKU_API_KEY)
+                heroku_conn = heroku.from_key(HEROKU_API_KEY)
+                rl = heroku_conn.ratelimit_remaining()
+                print "rate_limit_remaining = {0} for Generic API_KEY".format(rl)
             else:
-                print "[{0}] ratelimit ({1}) is greater than the previous rl ({2}), proceeding....".format(app.appname, rl, prev_limit)
+                print "[{0}] processing app {1}".format(app.appname, app.api_key)
+                heroku_conn = heroku.from_key(app.api_key)
+                rl = heroku_conn.ratelimit_remaining()
+                print "rate_limit_remaining = {0} for app configured key {1}".format(rl, app.api_key)
+                key_type = app.api_key
 
-        if (rl < 100) and (rl > 90):
-                irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
+            if app.appname in ratelimits:
+                prev_limit = ratelimits[app.appname]['prev_limit']
+                prev_time = ratelimits[app.appname]['prev_time']
+                current_time = time.time()
+                if (prev_limit - rl) > RATE_LIMIT_INTERVAL:
+                    time_diff = current_time - prev_time
+                    if time_diff > SLEEP_PERIOD:
+                        print "[{0}] ratelimit ({1}) is more than {4} lower than the previous rl ({2}), however no checks have been run for {3} seconds, proceeding....".format(app.appname, rl, prev_limit, time_diff)
+                    else:
+                        print "[{0}] skipping due to current ratelimit ({1}) being more than {3} lower than the previous rl ({2})".format(app.appname, rl, prev_limit)
+                        continue
+                else:
+                    print "[{0}] ratelimit ({1}) is greater than the previous rl ({2}), proceeding....".format(app.appname, rl, prev_limit)
 
-        if rl < 25:
-            print "[{0}] skipping due to ratelimit being too low {1}".format(app.appname, rl)
-            continue
+            if (rl < 100) and (rl > 90):
+                    irc.send_irc_message("[Proc_Scalar Warning] Heroku API RateLimit-Remaining = {0} for '{1}'".format(rl, key_type))
 
-        applimits = {'prev_limit': rl, 'prev_time': time.time()}
-        ratelimits[app.appname] = applimits
+            if rl < 25:
+                print "[{0}] skipping due to ratelimit being too low {1}".format(app.appname, rl)
+                continue
 
-        heroku_apps = heroku_conn.apps()
-        num_apps = len(apps)
-        try:
-            heroku_app = heroku_apps[app.appname]
-        except KeyError:
-            print "\n[ERROR] %s is not available via your configured HEROKU_API %s.\nAvailable apps are:-\n" % (app.appname, HEROKU_API_KEY)
-        else:
-            process_apps(app, heroku_conn, heroku_app)
-            time.sleep(3)
-    print "Cycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD
-    time.sleep(SLEEP_PERIOD)
+            applimits = {'prev_limit': rl, 'prev_time': time.time()}
+            ratelimits[app.appname] = applimits
+
+            heroku_apps = heroku_conn.apps()
+            num_apps = len(apps)
+            try:
+                heroku_app = heroku_apps[app.appname]
+            except KeyError:
+                print "\n[ERROR] %s is not available via your configured HEROKU_API %s.\nAvailable apps are:-\n" % (app.appname, HEROKU_API_KEY)
+            else:
+                process_apps(app, heroku_conn, heroku_app)
+                time.sleep(3)
+        print "Cycle Complete sleeping for %f".ljust(max_str_length) % SLEEP_PERIOD
+        time.sleep(SLEEP_PERIOD)
+except Exception, e:
+    client.captureException()
