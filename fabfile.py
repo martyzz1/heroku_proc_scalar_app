@@ -10,6 +10,7 @@ from proc_scalar.schema import App
 
 @task
 def set_max_dynos(appname, num):
+    """heroku run "fab set_max_dynos:stagingsharehoods,1 -astagingsharehoods" """
     return update_app(appname, {'max_dynos': num})
 
 
